@@ -83,7 +83,7 @@ export const RAW_LICENSING_DATA: Record<string, Record<string, string>> = {
   'Kansas': { 'Doron': 'pending' },
   'Kentucky': { 'Doron': '3/1/2027', 'Ashley Escoe': '10/31/2021' },
   'Louisiana': { 'Doron': 'pending', 'Tzvi Doron': '12/31/2023', 'Bryana': '01/31/2024', 'Ashley Escoe': '01/31/2027' },
-  'Maine': { 'Doron': '11/30/2027', 'Bill C': '9/11/2022' },
+  'Maine': { 'Doron': '11/30/2027', 'Bill C': '11/30/2027' },
   'Maryland': { 'Doron': '9/30/2027', 'Ashley Escoe': '02/28/2023' },
   'Massachusetts': { 'Doron': 'pending', 'Bill C': '6/23/2026', 'Tim M': '2/14/2028', 'Ashley Escoe': '02/21/2026' },
   'Michigan': { 'Doron': '3/18/2027', 'Tzvi Doron': '11/20/2026', 'Lindsay': '10/16/2027', 'Bill C': '8/7/2027', 'Ashley Escoe': '02/17/2028' },
