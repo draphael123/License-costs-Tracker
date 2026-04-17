@@ -6,6 +6,14 @@
 
 import { STATE_NAME_TO_ID } from './licenseCosts';
 
+// States where we currently operate - update this list as needed
+export const ACTIVE_STATES = new Set([
+  'AZ', 'CA', 'CO', 'FL', 'ID', 'IL', 'IN', 'IA', 'ME', 'MD',
+  'MA', 'MI', 'MN', 'MT', 'NE', 'NV', 'NJ', 'NM', 'NY', 'NC',
+  'ND', 'OH', 'OR', 'PA', 'SD', 'TX', 'UT', 'VT', 'VA', 'WA',
+  'WI', 'WY'
+]);
+
 export interface ProviderInfo {
   name: string;
   services: string[]; // TRT, HRT, GLP, Async
@@ -145,6 +153,9 @@ export function getAllRenewals(): ProviderRenewal[] {
 
   for (const [stateName, providers] of Object.entries(RAW_LICENSING_DATA)) {
     const stateId = STATE_NAME_TO_ID[stateName] || stateName;
+
+    // Only include states we operate in
+    if (!ACTIVE_STATES.has(stateId)) continue;
 
     for (const [providerName, dateString] of Object.entries(providers)) {
       const providerInfo = getProviderInfo(providerName);

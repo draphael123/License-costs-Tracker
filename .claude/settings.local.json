@@ -12,7 +12,12 @@
       "Bash(cat:*)",
       "Bash(git init:*)",
       "Bash(git add:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nInitial commit: License Cost Tracker\n\n- Dashboard with stats cards \\(upcoming, expired, pending, total cost\\)\n- Renewals tab with filtering by time range, state, provider\n- Cost by Provider breakdown with annual costs\n- Data visualizations \\(charts for cost by state, provider type, forecast\\)\n- Data from provider-licensing.csv with 24 providers across 50+ states\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git branch:*)",
+      "Bash(git remote add:*)",
+      "Bash(git push:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
