@@ -8,11 +8,12 @@ import CalendarView from './components/CalendarView';
 import SearchBar from './components/SearchBar';
 import ProviderDetail from './components/ProviderDetail';
 import ExportButton from './components/ExportButton';
+import AuditLog from './components/AuditLog';
 import { getUpcomingRenewals, getAllRenewals } from './data/providerLicensing';
 import { getLicenseCost } from './data/licenseCosts';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
 
-type Tab = 'overview' | 'renewals' | 'providers' | 'charts' | 'calendar';
+type Tab = 'overview' | 'renewals' | 'providers' | 'charts' | 'calendar' | 'audit';
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState<Tab>('overview');
@@ -27,6 +28,7 @@ function AppContent() {
     { id: 'calendar', label: 'Calendar' },
     { id: 'providers', label: 'By Provider' },
     { id: 'charts', label: 'Charts' },
+    { id: 'audit', label: 'Audit Log' },
   ];
 
   // Data sync information - update this when importing new CSV data
@@ -204,6 +206,8 @@ function AppContent() {
         )}
 
         {activeTab === 'charts' && <CostCharts />}
+
+        {activeTab === 'audit' && <AuditLog />}
       </main>
 
       {/* Footer */}
