@@ -6,3 +6,12 @@ body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   background-color: #f8fafc;
 }
+
+.dark body,
+html.dark body {
+  background-color: #111827;
+}
+
+html.dark {
+  background-color: #111827;
+}
