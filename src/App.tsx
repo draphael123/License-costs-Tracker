@@ -29,10 +29,13 @@ function AppContent() {
     { id: 'charts', label: 'Charts' },
   ];
 
-  const lastUpdated = new Date().toLocaleDateString('en-US', {
-    weekday: 'long',
+  // Data sync information - update this when importing new CSV data
+  const DATA_SYNC_DATE = '4/10/2026';
+  const SPREADSHEET_URL = 'https://docs.google.com/spreadsheets/d/1jJEb7PH14i3Byn5C5n90IFLYVOBXVGwzQrTsOA5Usgs/edit?gid=1028248383#gid=1028248383';
+
+  const lastSynced = new Date(DATA_SYNC_DATE).toLocaleDateString('en-US', {
     year: 'numeric',
-    month: 'long',
+    month: 'short',
     day: 'numeric',
   });
 
@@ -90,8 +93,19 @@ function AppContent() {
               </button>
 
               <div className="hidden md:block text-right">
-                <div className="text-xs text-gray-500 dark:text-gray-400">Last Updated</div>
-                <div className="text-sm font-medium text-gray-900 dark:text-white">{lastUpdated}</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">Data Synced</div>
+                <a
+                  href={SPREADSHEET_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline inline-flex items-center gap-1"
+                  title="View source spreadsheet"
+                >
+                  {lastSynced}
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
               </div>
             </div>
           </div>
@@ -197,11 +211,25 @@ function AppContent() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Fountain Vitality - Provider Licensing Cost Tracker
+              Fountain TRT - Provider Licensing Cost Tracker
             </p>
-            <p className="text-sm text-gray-400 dark:text-gray-500">
-              Data updates weekly from Provider Compliance Dashboard
-            </p>
+            <div className="flex items-center gap-4 text-sm">
+              <a
+                href={SPREADSHEET_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19.5 3h-15A1.5 1.5 0 003 4.5v15A1.5 1.5 0 004.5 21h15a1.5 1.5 0 001.5-1.5v-15A1.5 1.5 0 0019.5 3zm-9 15H6v-3h4.5v3zm0-4.5H6v-3h4.5v3zm0-4.5H6V6h4.5v3zm7.5 9h-6v-3h6v3zm0-4.5h-6v-3h6v3zm0-4.5h-6V6h6v3z"/>
+                </svg>
+                Source Spreadsheet
+              </a>
+              <span className="text-gray-400 dark:text-gray-500">|</span>
+              <span className="text-gray-400 dark:text-gray-500">
+                Last synced: {lastSynced}
+              </span>
+            </div>
           </div>
         </div>
       </footer>
