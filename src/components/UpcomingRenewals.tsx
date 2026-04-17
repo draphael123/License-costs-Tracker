@@ -3,7 +3,7 @@ import { getUpcomingRenewals, getExpiredRenewals, getPendingRenewals, ProviderRe
 import { getLicenseCost, getStateName } from '../data/licenseCosts';
 
 type FilterType = 'upcoming' | 'expired' | 'pending';
-type TimeRange = 30 | 60 | 90;
+type TimeRange = 30 | 60 | 90 | 180 | 365;
 type SortField = 'provider' | 'state' | 'type' | 'date' | 'cost';
 type SortDir = 'asc' | 'desc';
 
@@ -203,8 +203,8 @@ export default function UpcomingRenewals({
         </div>
 
         {filter === 'upcoming' && (
-          <div className="flex gap-2">
-            {([30, 60, 90] as TimeRange[]).map(range => (
+          <div className="flex flex-wrap gap-2">
+            {([30, 60, 90, 180, 365] as TimeRange[]).map(range => (
               <button
                 key={range}
                 onClick={() => setTimeRange(range)}
@@ -214,7 +214,7 @@ export default function UpcomingRenewals({
                     : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
                 }`}
               >
-                {range} days
+                {range === 365 ? '1 year' : `${range} days`}
               </button>
             ))}
           </div>
