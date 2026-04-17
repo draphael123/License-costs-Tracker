@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/components/costcharts.tsx","./src/components/costsummary.tsx","./src/components/dashboardstats.tsx","./src/components/upcomingrenewals.tsx","./src/data/licensecosts.ts","./src/data/providerlicensing.ts"],"version":"5.6.3"}
