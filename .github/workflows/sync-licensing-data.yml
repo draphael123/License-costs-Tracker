@@ -30,7 +30,7 @@ jobs:
       - name: Fetch and update licensing data
         id: sync
         run: |
-          node scripts/sync-data.js
+          node scripts/sync-data.cjs
         env:
           GOOGLE_SHEET_CSV_URL: ${{ secrets.GOOGLE_SHEET_CSV_URL }}
 
