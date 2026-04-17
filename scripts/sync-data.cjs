@@ -128,12 +128,19 @@ function parseCSVToRows(csvContent) {
 
 function extractLicensingData(rows) {
   const licensingData = {};
+  const seenStates = new Set();
 
   for (const row of rows) {
     // State name is in column 1 (index 1)
     const stateName = row[1];
 
     if (!stateName || !VALID_STATES.has(stateName)) {
+      continue;
+    }
+
+    // Skip duplicate state rows - use the first occurrence only
+    // This prevents later sections in the CSV (e.g., metadata tables) from overwriting licensing data
+    if (seenStates.has(stateName)) {
       continue;
     }
 
@@ -156,6 +163,7 @@ function extractLicensingData(rows) {
 
     if (Object.keys(stateData).length > 0) {
       licensingData[stateName] = stateData;
+      seenStates.add(stateName);
     }
   }
 
