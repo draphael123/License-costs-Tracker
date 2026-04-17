@@ -100,13 +100,13 @@ export default function DashboardStats() {
       {cards.map((card, idx) => (
         <div
           key={idx}
-          className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow"
+          className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow"
         >
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-500">{card.label}</p>
-              <p className="text-3xl font-bold text-gray-900 mt-1">{card.value}</p>
-              <p className="text-sm text-gray-500 mt-1">{card.subValue}</p>
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{card.label}</p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{card.value}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{card.subValue}</p>
             </div>
             <div className={`${card.color} text-white p-3 rounded-lg`}>
               {card.icon}

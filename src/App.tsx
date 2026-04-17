@@ -1,15 +1,28 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import DashboardStats from './components/DashboardStats';
 import UpcomingRenewals from './components/UpcomingRenewals';
-import CostSummary from './components/CostSummary';
-import CostCharts from './components/CostCharts';
-import CalendarView from './components/CalendarView';
 import SearchBar from './components/SearchBar';
 import ProviderDetail from './components/ProviderDetail';
 import ExportButton from './components/ExportButton';
-import AuditLog from './components/AuditLog';
+import ExpiredLicensesAlert from './components/ExpiredLicensesAlert';
+
+// Lazy load heavier components for code splitting
+const CostSummary = lazy(() => import('./components/CostSummary'));
+const CostCharts = lazy(() => import('./components/CostCharts'));
+const CalendarView = lazy(() => import('./components/CalendarView'));
+const AuditLog = lazy(() => import('./components/AuditLog'));
+
 import { getUpcomingRenewals, getAllRenewals } from './data/providerLicensing';
+
+// Loading fallback for lazy components
+function LoadingSpinner() {
+  return (
+    <div className="flex items-center justify-center py-12">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+    </div>
+  );
+}
 import { getLicenseCost } from './data/licenseCosts';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
 
@@ -147,6 +160,7 @@ function AppContent() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {activeTab === 'overview' && (
           <div className="space-y-8">
+            <ExpiredLicensesAlert onSelectProvider={handleSelectProvider} />
             <DashboardStats />
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -198,16 +212,28 @@ function AppContent() {
         )}
 
         {activeTab === 'calendar' && (
-          <CalendarView onSelectProvider={handleSelectProvider} />
+          <Suspense fallback={<LoadingSpinner />}>
+            <CalendarView onSelectProvider={handleSelectProvider} />
+          </Suspense>
         )}
 
         {activeTab === 'providers' && (
-          <CostSummary onSelectProvider={handleSelectProvider} />
+          <Suspense fallback={<LoadingSpinner />}>
+            <CostSummary onSelectProvider={handleSelectProvider} />
+          </Suspense>
         )}
 
-        {activeTab === 'charts' && <CostCharts />}
+        {activeTab === 'charts' && (
+          <Suspense fallback={<LoadingSpinner />}>
+            <CostCharts />
+          </Suspense>
+        )}
 
-        {activeTab === 'audit' && <AuditLog />}
+        {activeTab === 'audit' && (
+          <Suspense fallback={<LoadingSpinner />}>
+            <AuditLog />
+          </Suspense>
+        )}
       </main>
 
       {/* Footer */}

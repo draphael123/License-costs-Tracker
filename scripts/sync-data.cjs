@@ -4,10 +4,10 @@
  * This script fetches licensing data from Google Sheets and updates the local data file.
  *
  * Usage:
- *   node scripts/sync-data.js
+ *   node scripts/sync-data.cjs
  *
  * Or with a local CSV file:
- *   node scripts/sync-data.js --file path/to/file.csv
+ *   node scripts/sync-data.cjs --file path/to/file.csv
  *
  * Environment Variables:
  *   GOOGLE_SHEET_CSV_URL - URL to the published CSV (File > Share > Publish to web > CSV)
@@ -47,82 +47,19 @@ const PROVIDER_COLUMNS = {
   26: 'Nicole Tahira Perrotte'
 };
 
-// State rows in the CSV (row number to state name)
-const STATE_ROWS = {
-  11: 'California',
-  12: 'New York',
-  13: 'Texas',
-  14: 'Florida',
-  15: 'Pennsylvania',
-  16: 'Illinois',
-  17: 'Ohio',
-  18: 'Georgia',
-  19: 'North Carolina',
-  20: 'Michigan',
-  21: 'New Jersey',
-  22: 'Virginia',
-  23: 'Washington',
-  24: 'Arizona',
-  25: 'Massachusetts',
-  26: 'Tennessee',
-  27: 'Indiana',
-  28: 'Missouri',
-  29: 'Maryland',
-  30: 'Wisconsin',
-  31: 'Colorado',
-  32: 'Minnesota',
-  33: 'South Carolina',
-  34: 'Alabama',
-  35: 'Louisiana',
-  36: 'Kentucky',
-  37: 'Oregon',
-  38: 'Oklahoma',
-  39: 'Connecticut',
-  40: 'Utah',
-  41: 'Iowa',
-  42: 'Arkansas',
-  43: 'Mississippi',
-  44: 'Kansas',
-  45: 'New Mexico',
-  46: 'Nebraska',
-  47: 'Idaho',
-  48: 'West Virginia',
-  49: 'Hawaii',
-  50: 'Nevada',
-  51: 'New Hampshire',
-  52: 'Maine',
-  53: 'Montana',
-  54: 'Rhode Island',
-  55: 'Delaware',
-  56: 'South Dakota',
-  57: 'North Dakota',
-  58: 'Alaska',
-  59: 'DC',
-  60: 'Vermont',
-  61: 'Wyoming'
-};
-
-function parseCSVLine(line) {
-  const result = [];
-  let current = '';
-  let inQuotes = false;
-
-  for (let i = 0; i < line.length; i++) {
-    const char = line[i];
-
-    if (char === '"') {
-      inQuotes = !inQuotes;
-    } else if (char === ',' && !inQuotes) {
-      result.push(current.trim());
-      current = '';
-    } else {
-      current += char;
-    }
-  }
-
-  result.push(current.trim());
-  return result;
-}
+// Valid state names to look for in column B (index 1)
+const VALID_STATES = new Set([
+  'California', 'New York', 'Texas', 'Florida', 'Pennsylvania',
+  'Illinois', 'Ohio', 'Georgia', 'North Carolina', 'Michigan',
+  'New Jersey', 'Virginia', 'Washington', 'Arizona', 'Massachusetts',
+  'Tennessee', 'Indiana', 'Missouri', 'Maryland', 'Wisconsin',
+  'Colorado', 'Minnesota', 'South Carolina', 'Alabama', 'Louisiana',
+  'Kentucky', 'Oregon', 'Oklahoma', 'Connecticut', 'Puerto Rico',
+  'Utah', 'Iowa', 'Arkansas', 'Mississippi', 'Kansas',
+  'New Mexico', 'Nebraska', 'Idaho', 'West Virginia', 'Hawaii',
+  'Nevada', 'New Hampshire', 'Maine', 'Montana', 'Rhode Island',
+  'Delaware', 'South Dakota', 'North Dakota', 'Alaska', 'DC', 'Vermont', 'Wyoming'
+]);
 
 function fetchURL(url) {
   return new Promise((resolve, reject) => {
@@ -130,7 +67,6 @@ function fetchURL(url) {
 
     protocol.get(url, (response) => {
       if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
-        // Follow redirect
         fetchURL(response.headers.location).then(resolve).catch(reject);
         return;
       }
@@ -143,30 +79,76 @@ function fetchURL(url) {
   });
 }
 
-function parseCSV(csvContent) {
-  const lines = csvContent.split('\n').map(line => line.replace(/\r/g, ''));
+// Properly parse CSV handling multiline cells in quotes
+function parseCSVToRows(csvContent) {
+  const rows = [];
+  let currentRow = [];
+  let currentCell = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < csvContent.length; i++) {
+    const char = csvContent[i];
+    const nextChar = csvContent[i + 1];
+
+    if (char === '"') {
+      if (inQuotes && nextChar === '"') {
+        // Escaped quote
+        currentCell += '"';
+        i++;
+      } else {
+        // Toggle quote state
+        inQuotes = !inQuotes;
+      }
+    } else if (char === ',' && !inQuotes) {
+      currentRow.push(currentCell.trim());
+      currentCell = '';
+    } else if ((char === '\n' || (char === '\r' && nextChar === '\n')) && !inQuotes) {
+      currentRow.push(currentCell.trim());
+      if (currentRow.length > 1) {
+        rows.push(currentRow);
+      }
+      currentRow = [];
+      currentCell = '';
+      if (char === '\r') i++;
+    } else if (char !== '\r') {
+      currentCell += char;
+    }
+  }
+
+  // Handle last row
+  if (currentCell || currentRow.length > 0) {
+    currentRow.push(currentCell.trim());
+    if (currentRow.length > 1) {
+      rows.push(currentRow);
+    }
+  }
+
+  return rows;
+}
+
+function extractLicensingData(rows) {
   const licensingData = {};
 
-  for (let rowNum = 11; rowNum <= 70; rowNum++) {
-    if (!STATE_ROWS[rowNum]) continue;
+  for (const row of rows) {
+    // State name is in column 1 (index 1)
+    const stateName = row[1];
 
-    const lineIndex = rowNum - 1;
-    if (lineIndex >= lines.length) continue;
+    if (!stateName || !VALID_STATES.has(stateName)) {
+      continue;
+    }
 
-    const cells = parseCSVLine(lines[lineIndex]);
-    const stateName = STATE_ROWS[rowNum];
     const stateData = {};
 
     for (const [colIndex, providerName] of Object.entries(PROVIDER_COLUMNS)) {
-      const value = cells[parseInt(colIndex)] || '';
+      const value = row[parseInt(colIndex)] || '';
 
       // Skip empty values
       if (!value || value === '') continue;
 
-      // Clean up the value (remove extra whitespace, newlines)
-      const cleanValue = value.replace(/\s+/g, ' ').trim();
+      // Clean up the value (collapse whitespace)
+      let cleanValue = value.replace(/\s+/g, ' ').trim();
 
-      // Skip values that look like metadata
+      // Skip values that look like metadata or status columns
       if (cleanValue.match(/^(TRUE|FALSE|#REF!|Open|Closed|Promoting|Pending Expansion)$/i)) continue;
 
       stateData[providerName] = cleanValue;
@@ -255,12 +237,13 @@ export const PROVIDERS: ProviderInfo[] = [
 export const RAW_LICENSING_DATA: Record<string, Record<string, string>> = {
 `;
 
+  // Sort states alphabetically for consistency
   const stateNames = Object.keys(licensingData).sort();
 
   for (const stateName of stateNames) {
     const providers = licensingData[stateName];
     const entries = Object.entries(providers)
-      .map(([name, date]) => `'${name}': '${date}'`)
+      .map(([name, date]) => `'${name}': '${date.replace(/'/g, "\\'")}'`)
       .join(', ');
 
     output += `  '${stateName}': { ${entries} },\n`;
@@ -384,6 +367,86 @@ export function getRenewalsByState(): Record<string, ProviderRenewal[]> {
   return output;
 }
 
+// Known providers list for validation
+const KNOWN_PROVIDERS = new Set(Object.values(PROVIDER_COLUMNS));
+
+function parseValidationDate(dateStr) {
+  if (!dateStr || dateStr.toLowerCase() === 'pending' || dateStr.includes('pending')) {
+    return null;
+  }
+  const cleaned = dateStr.replace(/\s+/g, '').trim();
+  const parts = cleaned.split('/');
+  if (parts.length === 3) {
+    let [month, day, year] = parts.map(p => parseInt(p, 10));
+    if (year < 100) year += 2000;
+    const date = new Date(year, month - 1, day);
+    if (!isNaN(date.getTime())) return date;
+  }
+  const parsed = new Date(dateStr);
+  return isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function validateLicensingData(licensingData) {
+  const warnings = [];
+  const now = new Date();
+  let expiredCount = 0;
+  let unparsableCount = 0;
+  const unknownProviders = new Set();
+
+  for (const [state, providers] of Object.entries(licensingData)) {
+    for (const [provider, dateStr] of Object.entries(providers)) {
+      // Check for unknown providers
+      if (!KNOWN_PROVIDERS.has(provider)) {
+        unknownProviders.add(provider);
+      }
+
+      // Skip pending
+      if (dateStr.toLowerCase().includes('pending')) continue;
+
+      const date = parseValidationDate(dateStr);
+
+      if (!date) {
+        unparsableCount++;
+        warnings.push(`  - ${state} / ${provider}: Unparsable date "${dateStr}"`);
+      } else if (date < now) {
+        expiredCount++;
+        const daysAgo = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+        warnings.push(`  - ${state} / ${provider}: Expired ${daysAgo} days ago (${dateStr})`);
+      }
+    }
+  }
+
+  return { warnings, expiredCount, unparsableCount, unknownProviders: Array.from(unknownProviders) };
+}
+
+function updateAppSyncDate() {
+  const appPath = path.join(__dirname, '..', 'src', 'App.tsx');
+  const today = new Date().toLocaleDateString('en-US', {
+    month: 'numeric',
+    day: 'numeric',
+    year: 'numeric'
+  });
+
+  try {
+    let appContent = fs.readFileSync(appPath, 'utf-8');
+
+    // Update DATA_SYNC_DATE
+    const syncDateRegex = /const DATA_SYNC_DATE = '[^']+';/;
+    if (syncDateRegex.test(appContent)) {
+      appContent = appContent.replace(syncDateRegex, `const DATA_SYNC_DATE = '${today}';`);
+      fs.writeFileSync(appPath, appContent, 'utf-8');
+      console.log(`Updated DATA_SYNC_DATE in App.tsx to ${today}`);
+      return true;
+    } else {
+      console.warn('Warning: Could not find DATA_SYNC_DATE in App.tsx');
+      return false;
+    }
+  } catch (error) {
+    console.error('Error updating App.tsx:', error.message);
+    return false;
+  }
+}
+
 async function main() {
   const args = process.argv.slice(2);
   let csvContent;
@@ -405,18 +468,50 @@ async function main() {
   }
 
   console.log('Parsing CSV data...');
-  const licensingData = parseCSV(csvContent);
+  const rows = parseCSVToRows(csvContent);
+  console.log(`Parsed ${rows.length} rows from CSV`);
 
+  console.log('Extracting licensing data by state name...');
+  const licensingData = extractLicensingData(rows);
   console.log(`Found ${Object.keys(licensingData).length} states with licensing data`);
+  console.log('States:', Object.keys(licensingData).sort().join(', '));
 
-  console.log('Generating data file...');
+  // Validate the data
+  console.log('\nValidating data...');
+  const { warnings, expiredCount, unparsableCount, unknownProviders } = validateLicensingData(licensingData);
+
+  if (unknownProviders.length > 0) {
+    console.warn(`\nWarning: Found ${unknownProviders.length} unknown provider(s) not in PROVIDERS list:`);
+    unknownProviders.forEach(p => console.warn(`  - ${p}`));
+  }
+
+  if (expiredCount > 0 || unparsableCount > 0) {
+    console.warn(`\nData Quality Report:`);
+    console.warn(`  Expired licenses: ${expiredCount}`);
+    console.warn(`  Unparsable dates: ${unparsableCount}`);
+    if (warnings.length <= 20) {
+      console.warn('\nDetails:');
+      warnings.forEach(w => console.warn(w));
+    } else {
+      console.warn(`\nShowing first 20 of ${warnings.length} issues:`);
+      warnings.slice(0, 20).forEach(w => console.warn(w));
+    }
+  } else {
+    console.log('All dates valid and current!');
+  }
+
+  console.log('\nGenerating data file...');
   const outputContent = generateDataFile(licensingData);
 
   const outputPath = path.join(__dirname, '..', 'src', 'data', 'providerLicensing.ts');
   fs.writeFileSync(outputPath, outputContent, 'utf-8');
-
   console.log(`Successfully updated ${outputPath}`);
-  console.log('Done!');
+
+  // Auto-update the sync date in App.tsx
+  console.log('\nUpdating sync date in App.tsx...');
+  updateAppSyncDate();
+
+  console.log('\nDone!');
 }
 
 main().catch(error => {
