@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { getAllRenewals, getUpcomingRenewals, getExpiredRenewals, getPendingRenewals } from '../data/providerLicensing';
+import { getAllRenewals, getUpcomingRenewals, getPendingRenewals } from '../data/providerLicensing';
 import { getLicenseCost } from '../data/licenseCosts';
 
-type ExportType = 'all' | 'upcoming' | 'expired' | 'pending';
+type ExportType = 'all' | 'upcoming' | 'pending';
 
 export default function ExportButton() {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,10 +15,6 @@ export default function ExportButton() {
       case 'upcoming':
         renewals = getUpcomingRenewals(90);
         filename = 'upcoming-renewals';
-        break;
-      case 'expired':
-        renewals = getExpiredRenewals();
-        filename = 'expired-renewals';
         break;
       case 'pending':
         renewals = getPendingRenewals();
@@ -87,10 +83,6 @@ export default function ExportButton() {
       case 'upcoming':
         renewals = getUpcomingRenewals(90);
         title = 'Upcoming Renewals (Next 90 Days)';
-        break;
-      case 'expired':
-        renewals = getExpiredRenewals();
-        title = 'Expired Renewals';
         break;
       case 'pending':
         renewals = getPendingRenewals();
@@ -193,9 +185,6 @@ export default function ExportButton() {
               </button>
               <button onClick={() => exportToCSV('upcoming')} className="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
                 Upcoming (90 days)
-              </button>
-              <button onClick={() => exportToCSV('expired')} className="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-                Expired
               </button>
               <button onClick={() => exportToCSV('pending')} className="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
                 Pending

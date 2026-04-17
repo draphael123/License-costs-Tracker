@@ -126,7 +126,22 @@ function parseCSVToRows(csvContent) {
   return rows;
 }
 
-function extractLicensingData(rows) {
+function isExpiredDate(dateStr) {
+  if (!dateStr || dateStr.toLowerCase().includes('pending')) return false;
+  const cleaned = dateStr.replace(/[^0-9/]/g, '').trim();
+  const parts = cleaned.split('/');
+  if (parts.length === 3) {
+    let [month, day, year] = parts.map(p => parseInt(p, 10));
+    if (year < 100) year += 2000;
+    const date = new Date(year, month - 1, day);
+    if (!isNaN(date.getTime())) {
+      return date < new Date();
+    }
+  }
+  return false;
+}
+
+function extractLicensingData(rows, filterExpired = false) {
   const licensingData = {};
   const seenStates = new Set();
 
@@ -157,6 +172,9 @@ function extractLicensingData(rows) {
 
       // Skip values that look like metadata or status columns
       if (cleanValue.match(/^(TRUE|FALSE|#REF!|Open|Closed|Promoting|Pending Expansion)$/i)) continue;
+
+      // Skip expired dates if filtering is enabled
+      if (filterExpired && isExpiredDate(cleanValue)) continue;
 
       stateData[providerName] = cleanValue;
     }
@@ -331,14 +349,6 @@ export function getUpcomingRenewals(days: number = 30): ProviderRenewal[] {
     .sort((a, b) => (a.renewalDate?.getTime() || 0) - (b.renewalDate?.getTime() || 0));
 }
 
-export function getExpiredRenewals(): ProviderRenewal[] {
-  const now = new Date();
-
-  return getAllRenewals()
-    .filter(r => r.renewalDate && r.renewalDate < now)
-    .sort((a, b) => (b.renewalDate?.getTime() || 0) - (a.renewalDate?.getTime() || 0));
-}
-
 export function getPendingRenewals(): ProviderRenewal[] {
   return getAllRenewals()
     .filter(r => r.isPending)
@@ -479,8 +489,8 @@ async function main() {
   const rows = parseCSVToRows(csvContent);
   console.log(`Parsed ${rows.length} rows from CSV`);
 
-  console.log('Extracting licensing data by state name...');
-  const licensingData = extractLicensingData(rows);
+  console.log('Extracting licensing data by state name (filtering expired licenses)...');
+  const licensingData = extractLicensingData(rows, true);
   console.log(`Found ${Object.keys(licensingData).length} states with licensing data`);
   console.log('States:', Object.keys(licensingData).sort().join(', '));
 

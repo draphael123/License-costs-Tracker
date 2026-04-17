@@ -5,7 +5,6 @@ import UpcomingRenewals from './components/UpcomingRenewals';
 import SearchBar from './components/SearchBar';
 import ProviderDetail from './components/ProviderDetail';
 import ExportButton from './components/ExportButton';
-import ExpiredLicensesAlert from './components/ExpiredLicensesAlert';
 
 // Lazy load heavier components for code splitting
 const CostSummary = lazy(() => import('./components/CostSummary'));
@@ -262,7 +261,6 @@ function AppContent() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-8">
         {activeTab === 'overview' && (
           <div className="space-y-8 animate-fade-in">
-            <ExpiredLicensesAlert onSelectProvider={handleSelectProvider} />
             <DashboardStats />
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

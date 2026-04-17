@@ -1,8 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
-import { getUpcomingRenewals, getExpiredRenewals, getPendingRenewals, ProviderRenewal, ACTIVE_STATES } from '../data/providerLicensing';
+import { getUpcomingRenewals, getPendingRenewals, ProviderRenewal, ACTIVE_STATES } from '../data/providerLicensing';
 import { getLicenseCost, getStateName } from '../data/licenseCosts';
 
-type FilterType = 'upcoming' | 'expired' | 'pending';
+type FilterType = 'upcoming' | 'pending';
 type TimeRange = 30 | 60 | 90 | 180 | 365;
 type SortField = 'provider' | 'state' | 'type' | 'date' | 'cost';
 type SortDir = 'asc' | 'desc';
@@ -73,9 +73,6 @@ export default function UpcomingRenewals({
       case 'upcoming':
         data = getUpcomingRenewals(timeRange);
         break;
-      case 'expired':
-        data = getExpiredRenewals();
-        break;
       case 'pending':
         data = getPendingRenewals();
         break;
@@ -123,7 +120,7 @@ export default function UpcomingRenewals({
 
   const allProviders = useMemo(() => {
     const providers = new Set<string>();
-    [...getUpcomingRenewals(90), ...getExpiredRenewals(), ...getPendingRenewals()]
+    [...getUpcomingRenewals(365), ...getPendingRenewals()]
       .forEach(r => providers.add(r.provider));
     return Array.from(providers).sort();
   }, []);
@@ -171,7 +168,7 @@ export default function UpcomingRenewals({
           </div>
           <div>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">License Renewals</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Track upcoming, expired, and pending renewals</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Track upcoming and pending renewals</p>
           </div>
         </div>
       </div>
@@ -191,19 +188,6 @@ export default function UpcomingRenewals({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
             Upcoming ({getUpcomingRenewals(timeRange).length})
-          </button>
-          <button
-            onClick={() => setFilter('expired')}
-            className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
-              filter === 'expired'
-                ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-md shadow-red-500/25'
-                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 hover:border-red-300 dark:hover:border-red-500 hover:shadow-sm'
-            }`}
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            Expired ({getExpiredRenewals().length})
           </button>
           <button
             onClick={() => setFilter('pending')}

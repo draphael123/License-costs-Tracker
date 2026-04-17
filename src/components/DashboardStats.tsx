@@ -1,12 +1,11 @@
 import { useMemo } from 'react';
-import { getAllRenewals, getUpcomingRenewals, getExpiredRenewals, getPendingRenewals } from '../data/providerLicensing';
+import { getAllRenewals, getUpcomingRenewals, getPendingRenewals } from '../data/providerLicensing';
 import { getLicenseCost, DEA_COSTS } from '../data/licenseCosts';
 
 export default function DashboardStats() {
   const stats = useMemo(() => {
     const all = getAllRenewals();
     const upcoming30 = getUpcomingRenewals(30);
-    const expired = getExpiredRenewals();
     const pending = getPendingRenewals();
 
     // Calculate total cost for upcoming renewals
@@ -42,7 +41,6 @@ export default function DashboardStats() {
       totalLicenses: all.length,
       upcoming30Count: upcoming30.length,
       upcomingCost,
-      expiredCount: expired.length,
       pendingCount: pending.length,
       totalAnnualCost,
     };
@@ -61,22 +59,6 @@ export default function DashboardStats() {
       icon: (
         <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-      ),
-    },
-    {
-      label: 'Expired',
-      value: stats.expiredCount,
-      subValue: stats.expiredCount > 0 ? 'Needs attention' : 'All clear',
-      gradient: 'from-red-500 to-orange-500',
-      bgClass: 'stat-card-red',
-      iconBg: 'bg-red-500/20 dark:bg-red-500/30',
-      iconColor: 'text-red-600 dark:text-red-400',
-      valueColor: stats.expiredCount > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white',
-      pulse: stats.expiredCount > 0,
-      icon: (
-        <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
         </svg>
       ),
     },
@@ -139,13 +121,7 @@ export default function DashboardStats() {
               <p className={`text-4xl font-bold ${card.valueColor} tracking-tight`}>
                 {card.value}
               </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-                {card.pulse && (
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                  </span>
-                )}
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 {card.subValue}
               </p>
             </div>

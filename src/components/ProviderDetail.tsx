@@ -44,7 +44,6 @@ export default function ProviderDetail({ providerName, onClose }: ProviderDetail
     let totalCost = 0;
     let annualCost = 0;
     let upcomingCount = 0;
-    let expiredCount = 0;
     let pendingCount = 0;
 
     const now = new Date();
@@ -61,8 +60,6 @@ export default function ProviderDetail({ providerName, onClose }: ProviderDetail
 
       if (r.isPending) {
         pendingCount++;
-      } else if (r.renewalDate && r.renewalDate < now) {
-        expiredCount++;
       } else if (r.renewalDate && r.renewalDate <= thirtyDays) {
         upcomingCount++;
       }
@@ -71,7 +68,7 @@ export default function ProviderDetail({ providerName, onClose }: ProviderDetail
     // Add DEA
     annualCost += DEA_COSTS.annualEquivalent;
 
-    return { totalCost, annualCost, upcomingCount, expiredCount, pendingCount };
+    return { totalCost, annualCost, upcomingCount, pendingCount };
   }, [renewals]);
 
   return (
@@ -121,7 +118,7 @@ export default function ProviderDetail({ providerName, onClose }: ProviderDetail
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 bg-gray-50 dark:bg-gray-900/30 border-b border-gray-100 dark:border-gray-700/50">
+          <div className="grid grid-cols-3 gap-4 p-6 bg-gray-50 dark:bg-gray-900/30 border-b border-gray-100 dark:border-gray-700/50">
             <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700/50">
               <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-1">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -149,17 +146,6 @@ export default function ProviderDetail({ providerName, onClose }: ProviderDetail
               </div>
               <div className={`text-2xl font-bold ${stats.upcomingCount > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-gray-400'}`}>
                 {stats.upcomingCount}
-              </div>
-            </div>
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700/50">
-              <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-1">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                Expired
-              </div>
-              <div className={`text-2xl font-bold ${stats.expiredCount > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-400'}`}>
-                {stats.expiredCount}
               </div>
             </div>
           </div>
