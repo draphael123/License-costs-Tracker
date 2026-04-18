@@ -5,9 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "node scripts/sync-data.cjs && tsc -b && vite build",
+    "build:local": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "sync": "node scripts/sync-data.cjs"
   },
   "dependencies": {
     "react": "^18.3.1",

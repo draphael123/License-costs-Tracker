@@ -3,6 +3,9 @@
  *
  * This script fetches licensing data from Google Sheets and updates the local data file.
  *
+ * Source Google Sheet:
+ *   https://docs.google.com/spreadsheets/d/1jJEb7PH14i3Byn5C5n90IFLYVOBXVGwzQrTsOA5Usgs/edit?gid=1028248383#gid=1028248383
+ *
  * Usage:
  *   node scripts/sync-data.cjs
  *
@@ -12,6 +15,13 @@
  * Environment Variables:
  *   GOOGLE_SHEET_CSV_URL - URL to the published CSV (File > Share > Publish to web > CSV)
  */
+
+// Source spreadsheet configuration
+const GOOGLE_SHEET_ID = '1jJEb7PH14i3Byn5C5n90IFLYVOBXVGwzQrTsOA5Usgs';
+const GOOGLE_SHEET_GID = '1028248383';
+
+// Auto-generated CSV export URL (requires sheet to be publicly accessible or "Anyone with link")
+const GOOGLE_SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/export?format=csv&gid=${GOOGLE_SHEET_GID}`;
 
 const fs = require('fs');
 const path = require('path');
@@ -475,14 +485,19 @@ async function main() {
     const filePath = args[fileArgIndex + 1];
     console.log(`Reading from local file: ${filePath}`);
     csvContent = fs.readFileSync(filePath, 'utf-8');
-  } else if (process.env.GOOGLE_SHEET_CSV_URL) {
-    console.log('Fetching from Google Sheets...');
-    csvContent = await fetchURL(process.env.GOOGLE_SHEET_CSV_URL);
   } else {
-    console.error('Error: No data source provided.');
-    console.error('Either set GOOGLE_SHEET_CSV_URL environment variable');
-    console.error('or use --file path/to/file.csv');
-    process.exit(1);
+    // Use the configured Google Sheet URL (env var overrides default)
+    const sheetUrl = process.env.GOOGLE_SHEET_CSV_URL || GOOGLE_SHEET_CSV_URL;
+    console.log('Fetching from Google Sheets...');
+    console.log(`Sheet ID: ${GOOGLE_SHEET_ID}`);
+    try {
+      csvContent = await fetchURL(sheetUrl);
+    } catch (error) {
+      console.error('Error fetching from Google Sheets:', error.message);
+      console.error('\nMake sure the Google Sheet sharing is set to "Anyone with the link" can view.');
+      console.error('Alternatively, use --file path/to/file.csv with a local CSV export.');
+      process.exit(1);
+    }
   }
 
   console.log('Parsing CSV data...');
