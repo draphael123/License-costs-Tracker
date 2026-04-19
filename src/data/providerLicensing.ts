@@ -2,7 +2,7 @@
  * Provider Licensing Data
  * Contains renewal dates for each provider by state
  * Source: Provider Compliance Dashboard spreadsheet
- * Last Updated: 4/18/2026
+ * Last Updated: 4/19/2026
  */
 
 import { STATE_NAME_TO_ID } from './licenseCosts';
