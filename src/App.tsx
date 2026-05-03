@@ -110,7 +110,7 @@ function AppContent() {
   }, [activeTab]);
 
   // Data sync information - update this when importing new CSV data
-  const DATA_SYNC_DATE = '4/18/2026';
+  const DATA_SYNC_DATE = '5/3/2026';
   const SPREADSHEET_URL = 'https://docs.google.com/spreadsheets/d/1jJEb7PH14i3Byn5C5n90IFLYVOBXVGwzQrTsOA5Usgs/edit?gid=1028248383#gid=1028248383';
 
   const lastSynced = new Date(DATA_SYNC_DATE).toLocaleDateString('en-US', {
